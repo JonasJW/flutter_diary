@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:bloc_provider/bloc_provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_diary/blocs/diary.bloc.dart';
+import 'package:flutter_diary/main.dart';
 import 'package:flutter_diary/models/diary_entry.model.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -37,22 +40,49 @@ class _AddEntryPageState extends State<AddEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return PlatformScaffold(
+      appBar: PlatformAppBar(
         title: Text("Add Diary Entry"),
+        ios: (_) => CupertinoNavigationBarData(
+          trailing: PlatformIconButton(
+            icon: Icon(Icons.done),
+            onPressed: () {
+              BlocProvider.of<DiaryBloc>(context).addEntry(entry);
+              Navigator.pop(context);
+            },
+          )
+        ),
       ),
       body: SingleChildScrollView(
         child: entryForm(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          BlocProvider.of<DiaryBloc>(context).addEntry(entry);
-          Navigator.pop(context);
-        },
-        backgroundColor: Colors.green,
-        child: Icon(Icons.done),
+      android: (_) => MaterialScaffoldData(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            BlocProvider.of<DiaryBloc>(context).addEntry(entry);
+            Navigator.pop(context);
+          },
+          backgroundColor: Colors.green,
+          child: Icon(Icons.done),
+        ),
       ),
     );
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: Text("Add Diary Entry"),
+    //   ),
+    //   body: SingleChildScrollView(
+    //     child: entryForm(),
+    //   ),
+    //   floatingActionButton: FloatingActionButton(
+    //     onPressed: () {
+    //       BlocProvider.of<DiaryBloc>(context).addEntry(entry);
+    //       Navigator.pop(context);
+    //     },
+    //     backgroundColor: Colors.green,
+    //     child: Icon(Icons.done),
+    //   ),
+    // );
   }
 
   Widget entryForm() {
@@ -74,11 +104,11 @@ class _AddEntryPageState extends State<AddEntryPage> {
   Widget descriptionInput() {
     return MyFormField(
       label: "Description",
-      child: TextFormField(
+      child: PlatformTextField(
         onChanged: (value) => entry.description = value,
-        decoration: InputDecoration(
-          hintText: "Enter a Description"
-        ),
+        // decoration: InputDecoration(
+        //   hintText: "Enter a Description"
+        // ),
       ),
     );
   }
@@ -86,49 +116,71 @@ class _AddEntryPageState extends State<AddEntryPage> {
   Widget titleInput() {
     return MyFormField(
       label: "Title",
-      child: TextFormField(
+      child: PlatformTextField(
         onChanged: (value) => entry.title = value,
         keyboardType: TextInputType.multiline,
         maxLines: null,
-        decoration: InputDecoration(
-          hintText: "Title"
+        ios: (_) => CupertinoTextFieldData(
+          // decoration: BoxDecoration(
+          //   color: MyColors.backgroundColor1(MediaQuery.of(context).platformBrightness),
+          //   border: Border.all(color: MyColors.backgroundColor0(MediaQuery.of(context).platformBrightness)),
+          //   borderRadius: BorderRadius.all(Radius.circular(5))
+          // )
         ),
+        // decoration: InputDecoration(
+        //   hintText: "Title"
+        // ),
       ),
     );
   }
 
   Widget resourceInput() {
+
+    final children = diaryBloc.resources.map((resource) {
+      return DropdownMenuItem(
+        child: Text(resource),
+        value: resource,
+      );
+    }).toList();
+
     return MyFormField(
       label: "Add a Resource",
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
-            child: TextFormField(
-              initialValue: entry.value,
+            child: PlatformTextField(
+              // initialValue: entry.value,
               onChanged: (value) => entry.value = value,
             ),
           ),
           Container(width: 16),
           Expanded(
             child: Container(
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: entry.resource,
-                onChanged: (resource) {
-                  setState(() {
-                    entry.resource = resource;
-                  });
-                },
-                items: [
-                  ...diaryBloc.resources.map((resource) {
-                    return DropdownMenuItem(
-                      child: Text(resource),
-                      value: resource,
-                    );
-                  }).toList()
-                ],
-              ),
+              child: Platform.isIOS
+                ? Container(
+                    height: 100,
+                    child: CupertinoPicker(
+                      backgroundColor: Colors.transparent,
+                      children: children,
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          entry.resource = children[index].value;
+                        });
+                      },
+                      itemExtent: 50,
+                    ),
+                  )
+                : DropdownButton<String>(
+                    isExpanded: true,
+                    value: entry.resource,
+                    onChanged: (resource) {
+                      setState(() {
+                        entry.resource = resource;
+                      });
+                    },
+                    items: children
+                  ),
             ),
           ),
         ],
@@ -148,7 +200,7 @@ class _AddEntryPageState extends State<AddEntryPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 FlatButton(
-                  child: Text("Select Image..."),
+                  child: Text("Select Image...", style: TextStyle(color: MyColors.textColor(MediaQuery.of(context).platformBrightness))),
                   onPressed: () async {
                     final file = await ImagePicker.pickImage(source: ImageSource.gallery);
                     setState(() {
@@ -157,7 +209,7 @@ class _AddEntryPageState extends State<AddEntryPage> {
                   },
                 ),
                 FlatButton(
-                  child: Text("Record Image..."),
+                  child: Text("Record Image...", style: TextStyle(color: MyColors.textColor(MediaQuery.of(context).platformBrightness))),
                   onPressed: () async {
                     final file = await ImagePicker.pickImage(source: ImageSource.camera);
                     setState(() {
@@ -183,12 +235,28 @@ class _AddEntryPageState extends State<AddEntryPage> {
       child: Container(
         width: MediaQuery.of(context).size.width,
         child: FlatButton(
-          child: Text("${DateTime.fromMillisecondsSinceEpoch(entry.date).toString()}..."), // TODO:
+          child: Text("${DateTime.fromMillisecondsSinceEpoch(entry.date).toString()}...", style: TextStyle(color: MyColors.textColor(MediaQuery.of(context).platformBrightness))), // TODO:
           onPressed: () {
-            DatePicker.showDateTimePicker(context,
-              onConfirm: (date) => setState(() {entry.date = date.millisecondsSinceEpoch; }),
-              currentTime: DateTime.fromMillisecondsSinceEpoch(entry.date)
-            );
+            if (Platform.isIOS) {
+              showCupertinoModalPopup(
+                context: context,
+                builder: (_) {
+                  return Container(
+                    height: 300,
+                    child: CupertinoDatePicker(
+                      initialDateTime: DateTime.fromMillisecondsSinceEpoch(entry.date),
+                      onDateTimeChanged: (date) => setState(() {entry.date = date.millisecondsSinceEpoch; }),
+                      mode: CupertinoDatePickerMode.dateAndTime,
+                    ),
+                  );
+                }
+              );
+            } else {
+              DatePicker.showDateTimePicker(context,
+                onConfirm: (date) => setState(() {entry.date = date.millisecondsSinceEpoch; }),
+                currentTime: DateTime.fromMillisecondsSinceEpoch(entry.date)
+              );
+            }
           },
         ),
       ),
@@ -196,60 +264,81 @@ class _AddEntryPageState extends State<AddEntryPage> {
   }
 
   Widget tagInput() {
+    final children = diaryBloc.tags.map((value, tag) {
+      return MapEntry(value, DropdownMenuItem(
+        value: value,
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 30,
+              height: 30,
+              padding: EdgeInsets.all(0),
+              decoration: BoxDecoration(
+                color: tag.color,
+                borderRadius: BorderRadius.all(Radius.circular(100)),
+                boxShadow: [
+                  // BoxShadow(
+                  //   color: Colors.black.withOpacity(0.3),
+                  //   blurRadius: 2,
+                  //   offset: Offset(2, 2)
+                  // )
+                ]
+              ),
+              child: Icon(tag.icon, color: Colors.white, size: 20,),
+            ),
+            Container(width: 16),
+            Expanded(child: Text(tag.name)),
+          ],
+        ),
+      ));
+    }).values.toList();
+
     return MyFormField(
       label: "Choose a Tag",
-      child: DropdownButton<int>(
-        isExpanded: true,
-        onChanged: (value) {
-          if (value < diaryBloc.tags.length) {
-            setState(() { entry.tag = value; });
-          } else {
-            showDialog(
-              context: context,
-              builder: (_) {
-                return new AlertDialog(
-                  title: Text("TODO"),
+      child: Platform.isIOS 
+        ? Container(
+          height: 100,
+          child: CupertinoPicker(
+            backgroundColor: Colors.transparent,
+            children: children,
+            onSelectedItemChanged: (value) {
+              setState(() {
+                if (value < diaryBloc.tags.length) {
+                  setState(() { entry.tag = value; });
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (_) {
+                      return new AlertDialog(
+                        title: Text("TODO"),
+                      );
+                    }
+                  );
+                }
+              });
+            },
+            itemExtent: 50,
+          ),
+        )
+        : DropdownButton<int>(
+            isExpanded: true,
+            onChanged: (value) {
+              if (value < diaryBloc.tags.length) {
+                setState(() { entry.tag = value; });
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (_) {
+                    return new AlertDialog(
+                      title: Text("TODO"),
+                    );
+                  }
                 );
               }
-            );
-          }
-        },
-        value: entry.tag,
-        items: [
-          ...diaryBloc.tags.map((value, tag) {
-            return MapEntry(value, DropdownMenuItem(
-              value: value,
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    width: 30,
-                    height: 30,
-                    padding: EdgeInsets.all(0),
-                    decoration: BoxDecoration(
-                      color: tag.color,
-                      borderRadius: BorderRadius.all(Radius.circular(100)),
-                      boxShadow: [
-                        // BoxShadow(
-                        //   color: Colors.black.withOpacity(0.3),
-                        //   blurRadius: 2,
-                        //   offset: Offset(2, 2)
-                        // )
-                      ]
-                    ),
-                    child: Icon(tag.icon, color: Colors.white, size: 20,),
-                  ),
-                  Container(width: 16),
-                  Expanded(child: Text(tag.name)),
-                ],
-              ),
-            ));
-          }).values.toList(),
-          DropdownMenuItem(
-            value: diaryBloc.tags.length,
-            child: Text("Edit Tags...", style: TextStyle(fontStyle: FontStyle.italic)),
-          )
-        ]
-      ),
+            },
+            value: entry.tag,
+            items: children
+          ),
     );
   }
 
@@ -285,15 +374,15 @@ class MyFormField extends StatelessWidget {
       margin: EdgeInsets.all(16),
       // padding: disablePadding == false || disablePadding == null ? EdgeInsets.only(left: 16, right: 16, bottom: 10, top: 8) : EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: MyColors.backgroundColor1(MediaQuery.of(context).platformBrightness),
         borderRadius: BorderRadius.all(Radius.circular(10.0))
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0, top: 8),
-            child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.black.withOpacity(0.7))),
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 4, top: 8),
+            child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: MyColors.textColorAlpha(MediaQuery.of(context).platformBrightness))),
           ),
           Padding(
             padding: disablePadding == false || disablePadding == null ? EdgeInsets.only(left: 16, right: 16, bottom: 10, top: 0) : EdgeInsets.only(top: 8),

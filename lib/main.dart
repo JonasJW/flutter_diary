@@ -24,6 +24,22 @@ class MyColors {
       return Color.fromRGBO(0, 0, 0, 1);
     }
   }
+
+  static Color textColor(Brightness brightness) {
+    if (brightness == Brightness.light) {
+      return Colors.black;
+    } else {
+      return Colors.white;
+    }
+  }
+
+  static Color textColorAlpha(Brightness brightness) {
+    if (brightness == Brightness.light) {
+      return Colors.black54;
+    } else {
+      return Colors.white70;
+    }
+  }
 }
 
 void main() => runApp(MaterialApp(home: MyApp()));
@@ -74,7 +90,7 @@ class MyApp extends StatelessWidget {
           android: (context) {
             return MaterialAppData(
               darkTheme: materialDarkTheme,
-              theme: materialLightTheme
+              theme: ThemeData()
             );
           },
           ios: (_) {
@@ -83,6 +99,17 @@ class MyApp extends StatelessWidget {
                 ? cupertinoTheme
                 : cupertinoThemeDark
             );
+          },
+          onGenerateRoute: (RouteSettings route) {
+            final pathElementes = route.name.split("/");
+            if (pathElementes[1] == "add") {
+              return new MaterialPageRoute(
+                builder: (_) {
+                  return AddEntryPage();
+                }
+              );
+            }
+            return null;
           },
         ),
       ),

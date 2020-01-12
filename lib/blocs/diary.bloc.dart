@@ -16,7 +16,7 @@ class TagItem {
 }
 
 class DiaryBloc extends Bloc {
-  List<DiaryEntry> _entries;
+  List<DiaryEntry> _entries = [];
   Map<int, TagItem> tags = {
     0: TagItem("Sport", Colors.red, Icons.directions_run),
     1: TagItem("Work", Colors.blue, Icons.work),

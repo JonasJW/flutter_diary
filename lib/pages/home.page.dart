@@ -34,27 +34,76 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    
 
-    final List<Widget> _pages = [
-      TodayView(),
-      WeekView(),
-      MapView()
-      // Container(
-      //   color: Colors.red,
-      // ),
-      // Container(
-      //   color: Colors.blue,
-      // )
-    ];
-
-    return PlatformScaffold(
-      appBar: PlatformAppBar(
-        title: Text("Flutter Diary"),
-        ios: (_) => CupertinoNavigationBarData(
-          
+    if (Platform.isIOS) {
+      return CupertinoTabScaffold(
+        tabBar: CupertinoTabBar(
+          items: [
+            BottomNavigationBarItem(
+              icon: new Icon(Icons.today),
+              title: new Text('Today'),
+            ),
+            BottomNavigationBarItem(
+              icon: new Icon(Icons.view_week),
+              title: new Text('Week'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              title: Text('Maps')
+            )
+          ],
         ),
-        android: (_) => MaterialAppBarData(
+        tabBuilder: (context, index) {
+          switch (index) {
+            case 0:
+              return CupertinoPageScaffold(
+                navigationBar: CupertinoNavigationBar(
+                  middle: Text("Flutter Diary"),
+                  trailing: PlatformIconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () => Navigator.pushNamed(context, "/add"),
+                  ),
+                ),
+                child: CupertinoTabView(
+                  builder: (_) {
+                    return TodayView();
+                  },
+                ),
+              );
+            case 1:
+              return CupertinoTabView(
+                builder: (_) {
+                  return CupertinoPageScaffold(
+                    navigationBar: CupertinoNavigationBar(
+                      middle: Text("Flutter Diary"),
+                      trailing: PlatformIconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () => Navigator.pushNamed(context, "/add"),
+                      ),
+                    ),
+                    child: WeekView()
+                  );
+                },
+              );
+            case 2:
+              return CupertinoTabView(
+                builder: (_) {
+                  return CupertinoPageScaffold(
+                    navigationBar: CupertinoNavigationBar(
+                      middle: Text("Flutter Diary"),
+                    ),
+                    child: MapView()
+                  );
+                },
+              );
+          }
+          return null;
+        },
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Flutter Diary"),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.delete),
@@ -76,75 +125,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ],
           ),
         ),
-      ),
-      // body: TabBarView(
-      //   controller: tabController,
-      //   physics: NeverScrollableScrollPhysics(),
-      //   children: <Widget>[
-      //     TodayView(),
-      //     WeekView(),
-      //     MapView()
-      //   ],
-      // ),
-      body: Platform.isIOS
-        ? _pages[_selectedTab]
-        : TabBarView(
-            controller: tabController,
-            physics: NeverScrollableScrollPhysics(),
-            children: _pages
-          ),
-      android: (_) => MaterialScaffoldData(
         floatingActionButton: tabController.index != 2 
           ? FloatingActionButton(
             onPressed: () => Navigator.pushNamed(context, "/add"),
             tooltip: 'Add Entry',
             child: Icon(Icons.add))
-          : Container()
-      ),
-      bottomNavBar: PlatformNavBar(
-        ios: (_) => CupertinoTabBarData(
-          currentIndex: _selectedTab,
-          itemChanged: (index) {
-            setState(() {
-              _selectedTab = index; 
-            });
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: new Icon(CupertinoIcons.home),
-              title: new Text('Home'),
-            ),
-            BottomNavigationBarItem(
-              icon: new Icon(CupertinoIcons.bell),
-              title: new Text('Statistics'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person),
-              title: Text('Profile')
-            )
-          ] 
+          : Container(),
+        body: TabBarView(
+          controller: tabController,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            TodayView(),
+            WeekView(),
+            MapView()
+          ]
         ),
-        items: [
-          BottomNavigationBarItem(
-              icon: new Icon(CupertinoIcons.home),
-              title: new Text('Home'),
-            ),
-            BottomNavigationBarItem(
-              icon: new Icon(CupertinoIcons.bell),
-              title: new Text('Statistics'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person),
-              title: Text('Profile')
-            )
-        ],
-      ),
-    );
+      );
+    }
   }
-
-  // _handleTabChanges() {
-  //   setState(() {
-  //     currentPage = 
-  //   });
-  // }
 }

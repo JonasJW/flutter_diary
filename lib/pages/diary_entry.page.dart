@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_diary/models/diary_entry.model.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 
 class DiaryEntryPage extends StatelessWidget {
@@ -11,18 +12,32 @@ class DiaryEntryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: AppBar(title:  Text(diaryEntry.title)),
+    return PlatformScaffold(
+      // TODO: !!!
+      appBar: PlatformAppBar(
+        title: Text(diaryEntry.title),
+      ),
       body: Center(
-      child: Column(
-        children: <Widget>[
-          Text(diaryEntry.title),
-          buildAddress()
-          // Text(_coordinatesToAdress(diaryEntry.latitude, diaryEntry.longitude))
-        ],
-      ),
-      ),
+        child: Column(
+          children: <Widget>[
+            Text(diaryEntry.title),
+            buildAddress()
+          ],
+        ),
+      )
     );
+    // return new Scaffold(
+    //   appBar: AppBar(title:  Text(diaryEntry.title)),
+    //     body: Center(
+    //     child: Column(
+    //       children: <Widget>[
+    //         Text(diaryEntry.title),
+    //         buildAddress()
+    //         // Text(_coordinatesToAdress(diaryEntry.latitude, diaryEntry.longitude))
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 
   Widget buildAddress() {

@@ -5,6 +5,7 @@ import 'package:flutter_diary/blocs/diary.bloc.dart';
 import 'package:flutter_diary/components/entry_item.component.dart';
 import 'package:flutter_diary/components/timeline/timeline.dart';
 import 'package:flutter_diary/components/timeline/timeline_model.dart';
+import 'package:flutter_diary/main.dart';
 import 'package:flutter_diary/models/diary_entry.model.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
@@ -52,7 +53,7 @@ class _WeekViewState extends State<WeekView> {
 
   Widget buildWeekNavigator() {
     return Container(
-      color: Colors.white.withOpacity(0.8),
+      color: MyColors.backgroundColor1(MediaQuery.of(context).platformBrightness).withOpacity(0.7),
       child: Row(
         children: <Widget>[
           

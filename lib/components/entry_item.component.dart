@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_diary/main.dart';
 import 'package:flutter_diary/models/diary_entry.model.dart';
 import 'package:flutter_diary/pages/diary_entry.page.dart';
 
@@ -17,6 +18,7 @@ class EntryComponent extends StatelessWidget {
       elevation: 16,
       semanticContainer: true,
       clipBehavior: Clip.antiAliasWithSaveLayer,
+      color: MyColors.backgroundColor1(MediaQuery.of(context).platformBrightness),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15)
       ),
@@ -38,14 +40,14 @@ class EntryComponent extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     Text(diaryEntry.title, 
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: MyColors.textColor(MediaQuery.of(context).platformBrightness)),
                       maxLines: 1,
                       overflow: TextOverflow.fade,
                       softWrap: false,
                     ),
                     Container(height: 8),
                     if (diaryEntry.date != null) Text(DateTime.fromMillisecondsSinceEpoch(diaryEntry.date).toString(),
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                      style: TextStyle(fontSize: 14, color: MyColors.textColorAlpha(MediaQuery.of(context).platformBrightness)),
                       maxLines: 1,
                       overflow: TextOverflow.fade,
                       softWrap: false,
